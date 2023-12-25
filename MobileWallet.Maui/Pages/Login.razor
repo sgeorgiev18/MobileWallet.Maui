@@ -1,0 +1,109 @@
+﻿@page "/"
+@using MobileWallet.Maui.Data;
+@using MobileWallet.Maui.Services;
+@using Microsoft.Maui.Controls;
+@inject AppService _appSerivce
+@inject NavigationManager NavigationManager
+
+<style>
+    body {
+        overflow: hidden;
+    }
+
+    .btn-primary {
+        background-color: #007bff; /* Blue color */
+        color: #fff;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+
+    input {
+        width: 100%; /* Take up 100% width of the parent */
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 5px; /* Rounded corners for input fields */
+    }
+
+    .form-group {
+        margin-bottom: 15px;
+    }
+
+    .login-container { 
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+        position: relative;
+        top: -10vh;
+    }
+
+    .login-form {
+        max-width: 400px; /* Set a maximum width for the form */
+        width: 100%;
+        padding: 20px;
+        border: 1px solid #ccc;
+        border-radius: 10px; /* Rounded corners */
+    }
+    
+</style>
+
+
+<body>
+    <div class="login-container">
+
+        <div class="login-form">
+            <h3>Login</h3>
+            <div>
+                <img src="images/example_logo.jpg" />
+            </div>
+
+            <EditForm Model="@loginModel" OnValidSubmit="Submit">
+                <DataAnnotationsValidator />
+                <div class="form-group">
+                    <label>Email address</label>
+                    <input type="email" @bind-value="loginModel.Email" class="form-control" placeholder="Enter email">
+                    <ValidationMessage For="@(()=> loginModel.Email)" />
+                </div>
+                <div class="mt-2 form-group">
+                    <label>Password</label>
+                    <input type="password" @bind-value="loginModel.Password" class="form-control" placeholder="Password">
+                    <ValidationMessage For="@(()=> loginModel.Password)" />
+                </div>
+
+                <div class="mt-2 text-end">
+                    <NavLink class="nav-link" href="register">
+                        <span>Click here to create new account?</span>
+                    </NavLink>
+                </div>
+
+                <div class="text-center mt-2">
+                    <button class="btn btn-primary" type="submit">
+                        <span class="@_spinnerClass" role="status" aria-hidden="true"></span>
+                        Sign In
+                    </button>
+                </div>
+            </EditForm>
+        </div>
+    </div>
+</body>
+
+
+
+@code {
+    LoginModel loginModel = new LoginModel();
+    private string _spinnerClass = "";
+    private async void Submit()
+    {
+        _spinnerClass = "spinner-border spinner-border-sm";
+        var res = await _appSerivce.Authenticate(loginModel);
+
+        if (res.Success)
+        {
+            NavigationManager.NavigateTo("/balance");
+        }
+        else 
+            await App.Current.MainPage.DisplayAlert("Alert", res.ErrorMessage, "OK");
+    }
+}
